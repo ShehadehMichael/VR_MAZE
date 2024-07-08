@@ -1,0 +1,58 @@
+#include <BluetoothSerial.h>
+
+BluetoothSerial SerialBT;
+   uint8_t macAddress[6];
+   bool macAddressPrinted = false;
+     unsigned long previousMillis = 0; // Timer variable
+  const long interval = 10000; // Interval of 10 seconds (10000 milliseconds)
+   void setup() {
+  Serial.begin(115200);
+  SerialBT.begin("ESP32_BT_Test"); 
+  Serial.println("The device started, now you can pair it with bluetooth!");
+
+  
+
+  SerialBT.getBtAddress(macAddress);
+ 
+}
+
+void loop() {
+  if (!macAddressPrinted) {
+    // Display MAC address
+    uint8_t macAddress[6];
+    SerialBT.getBtAddress(macAddress);
+    Serial.printf("ESP32 MAC Address: %02X:%02X:%02X:%02X:%02X:%02X\n", 
+                   macAddress[0], macAddress[1], macAddress[2], 
+                   macAddress[3], macAddress[4], macAddress[5]);
+    macAddressPrinted = true;
+  }
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+
+    // Check if the Bluetooth is connected
+    if (SerialBT.hasClient()) {
+      Serial.println("connected");
+    } else {
+      Serial.println("disconnected");
+    }
+  }
+  if (SerialBT.available()) {
+    String data = SerialBT.readString();
+   
+
+   
+    if (data == "solved") {
+     
+      Serial.println("Received 'solved', performing action...");
+  
+    }
+  }
+
+  
+  if (Serial.available()) {
+    String data = Serial.readString();
+    SerialBT.println(data);
+    Serial.println("Sent data: " + data);
+  }
+}
